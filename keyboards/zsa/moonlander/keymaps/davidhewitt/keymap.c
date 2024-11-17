@@ -36,6 +36,7 @@ enum custom_keycodes {
     WIN_8,
     WIN_9,
     WIN_10,
+    HOST,
 };
 
 typedef struct {
@@ -56,7 +57,8 @@ enum {
 // Tap dance enums
 enum {
     X_FN,
-    X_LCTRL,
+    X_LCTL,
+    X_LGUI,
     X_LALT,
 };
 
@@ -69,6 +71,7 @@ void x_reset(tap_dance_state_t *state, void *user_data);
 
 enum {
     LAYER_BASE,
+    LAYER_BASE_MACOS,
     LAYER_FN,
     LAYER_NUMS,
     LAYER_FN_NUMS,
@@ -92,21 +95,32 @@ enum {
 
 #define KC_X_FN TD(X_FN)
 #define KC_XALT TD(X_LALT)
-#define KC_XCTL TD(X_LCTRL)
+#define KC_XCTL TD(X_LCTL)
+#define KC_XGUI TD(X_LGUI)
 #define NUMBERS MO(LAYER_NUMS)
 #define FN_NUMS MO(LAYER_FN_NUMS)
 #define WINTRVL MO(LAYER_WINTRAVEL)
 #define JUMPKEY OSL(LAYER_LAYERTRAVEL)
+#define KCASMAC DF(LAYER_BASE_MACOS)
+#define KCASWIN DF(LAYER_BASE)
 
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [LAYER_BASE] = LAYOUT_moonlander(
-    KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    _______,               _______, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    _______,
+    KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KCASMAC,               _______, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    HOST,
     KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    _______,               KC_MEH,  KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    _______,
     WINTRVL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_ESC,                _______, KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_LALT,
     KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                                    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,
     KC_LCTL, KC_LGUI, KC_XALT, _______, JUMPKEY,          NUMBERS,               KC_ARRS,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_RCTL,
                                         KC_BSPC, KC_X_FN, KC_XCTL,               KC_ENT,  KC_RSFT, KC_SPCE
+  ),
+  [LAYER_BASE_MACOS] = LAYOUT_moonlander(
+    KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KCASWIN,               _______, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    HOST,
+    KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    _______,               KC_MEH,  KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    _______,
+    WINTRVL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_ESC,                _______, KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_LALT,
+    KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                                    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,
+    KC_LCTL, KC_LGUI, KC_XALT, _______, JUMPKEY,          NUMBERS,               KC_ARRS,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_RCTL,
+                                        KC_BSPC, KC_X_FN, KC_XGUI,               KC_ENT,  KC_RSFT, KC_SPCE
   ),
   [LAYER_FN] = LAYOUT_moonlander(
     KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   TO(0),                 _______, KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
@@ -298,6 +312,15 @@ bool handle_sticky_arrows(uint16_t keycode, keyrecord_t *record) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (keycode == HOST) {
+        int os = detected_host_os() == OS_MACOS ? KC_M : KC_W;
+        if (record->event.pressed) {
+            register_code(os);
+        } else {
+            unregister_code(os);
+        }
+        return false;
+    }
     if (!handle_sticky_modifiers(keycode, record)) {
         return false;
     }
@@ -337,6 +360,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
  *
  */
 uint8_t cur_dance(tap_dance_state_t *state) {
+
     if (state->count == 1) {
         if (state->interrupted || !state->pressed) return SINGLE_TAP;
         // Key has not been interrupted, but the key is still held. Means you want to send a 'HOLD'.
@@ -367,9 +391,10 @@ uint8_t cur_dance(tap_dance_state_t *state) {
 }
 
 const uint16_t x_modifiers[][2] = {
-    [X_FN]    = {MO(LAYER_FN), MO(LAYER_FN_NUMS)},
-    [X_LCTRL] = {KC_LCTL, LCTL_NUM},
-    [X_LALT]  = {KC_LALT, LALT_NUM},
+    [X_FN]   = {MO(LAYER_FN), MO(LAYER_FN_NUMS)},
+    [X_LCTL] = {KC_LCTL, LCTL_NUM},
+    [X_LGUI] = {KC_LGUI, LCTL_NUM},
+    [X_LALT] = {KC_LALT, LALT_NUM},
 };
 
 void set_modifier(const uint16_t keycode) {
@@ -417,9 +442,10 @@ void unset_modifier(const uint16_t keycode) {
 }
 
 tap_dance_action_t tap_dance_actions[] = {
-    [X_FN]    = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
-    [X_LCTRL] = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
-    [X_LALT]  = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
+    [X_FN]   = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
+    [X_LCTL] = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
+    [X_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
+    [X_LALT] = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
 };
 
 void x_on_each_tap(tap_dance_state_t *state, void *user_data) {
@@ -438,4 +464,22 @@ void x_reset(tap_dance_state_t *state, void *user_data) {
     const uint16_t tap_dance_code = TAP_DANCE_KEYCODE(state) ^ QK_TAP_DANCE;
     const uint8_t  modifier       = (state->count - 1) % 2;
     unset_modifier(x_modifiers[tap_dance_code][modifier]);
+}
+
+// TODO: couldn't get this to work
+
+bool process_detected_host_os_user(os_variant_t detected_os) {
+    switch (detected_os) {
+        case OS_MACOS:
+            set_single_persistent_default_layer(LAYER_BASE_MACOS);
+            break;
+        case OS_IOS:
+        case OS_WINDOWS:
+        case OS_LINUX:
+        case OS_UNSURE:
+            set_single_persistent_default_layer(LAYER_BASE);
+            break;
+    }
+
+    return false;
 }
