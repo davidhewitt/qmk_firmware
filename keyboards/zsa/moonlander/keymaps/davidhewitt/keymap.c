@@ -59,6 +59,7 @@ enum {
 // Tap dance enums
 enum {
     X_FN,
+    X_FN_MAC,
     X_LCTL,
     X_LGUI,
     X_LALT,
@@ -75,6 +76,7 @@ enum {
     LAYER_BASE,
     LAYER_BASE_MAC,
     LAYER_FN,
+    LAYER_FN_MAC,
     LAYER_NUMS,
     LAYER_FN_NUMS,
     LAYER_WINTRAVEL,
@@ -103,8 +105,14 @@ enum {
 #define FN_NUMS MO(LAYER_FN_NUMS)
 #define WINTRVL MO(LAYER_WINTRAVEL)
 #define JUMPKEY OSL(LAYER_LAYERTRAVEL)
-// #define KCASMAC DF(LAYER_BASE_MAC)
-// #define KCASWIN DF(LAYER_BASE)
+
+// mac specific keycodes
+#define KM_HASH LALT(KC_3)
+#define KM_PIPE LSFT(KC_NONUS_HASH)
+#define KM_TILD LSFT(KC_GRV)
+#define KM_X_FN TD(X_FN_MAC)
+#define KM_AT S(KC_2)
+#define KM_DQUO S(KC_QUOT)
 
 static bool is_macos = false;
 
@@ -124,13 +132,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     WINTRVL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_ESC,                _______, KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_LALT,
     KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                                    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,
     KC_LCTL, KC_LGUI, KC_XALT, _______, JUMPKEY,          NUMBERS,               KC_ARRS,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_RCTL,
-                                        KC_BSPC, KC_X_FN, KC_XGUI,               KC_ENT,  KC_RSFT, KC_SPCE
+                                        KC_BSPC, KM_X_FN, KC_XGUI,               KC_ENT,  KC_RSFT, KC_SPCE
   ),
   [LAYER_FN] = LAYOUT_moonlander(
     KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   TO(0),                 _______, KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
-    _______, KC_EXLM, KC_DQUO, KC_LCBR, KC_RCBR, KC_QUOT, _______,               _______, KC_QUOT, KC_EQL,  KC_PLUS, KC_DLR,  KCPOUND, KC_F12,
+    _______, KC_EXLM, UK_AT,   KC_LCBR, KC_RCBR, KC_QUOT, _______,               _______, KC_QUOT, KC_EQL,  KC_PLUS, KC_DLR,  KCPOUND, KC_F12,
     _______, KC_HASH, KC_PERC, KC_LPRN, KC_RPRN, KC_GRV,  _______,               _______, KC_AT,   KC_MINS, KC_UNDS, KC_TILD, KC_COLN, _______,
     _______, KC_PIPE, KC_CIRC, KC_LBRC, KC_RBRC, KC_BSLH,                        KC_AMPR, KC_ASTR, KC_LABK, KC_RABK, KC_QUES, _______,
+    _______, KC_APP,  _______, _______, _______,          _______,               _______,          KC_HOME, KC_PGDN, KC_PGUP, KC_END,  _______,
+                                        KC_DEL,  _______, _______,               _______, _______, _______
+  ),
+  [LAYER_FN_MAC] = LAYOUT_moonlander(
+    KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   TO(0),                 _______, KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
+    _______, KC_EXLM, KM_AT,   KC_LCBR, KC_RCBR, KC_QUOT, _______,               _______, KC_QUOT, KC_EQL,  KC_PLUS, KC_DLR,  KCPOUND, KC_F12,
+    _______, KM_HASH, KC_PERC, KC_LPRN, KC_RPRN, KC_GRV,  _______,               _______, KM_DQUO, KC_MINS, KC_UNDS, KM_TILD,  KC_COLN, _______,
+    _______, KM_PIPE, KC_CIRC, KC_LBRC, KC_RBRC, KC_BSLH,                        KC_AMPR, KC_ASTR, KC_LABK, KC_RABK, KC_QUES, _______,
     _______, KC_APP,  _______, _______, _______,          _______,               _______,          KC_HOME, KC_PGDN, KC_PGUP, KC_END,  _______,
                                         KC_DEL,  _______, _______,               _______, _______, _______
   ),
@@ -267,7 +283,7 @@ bool handle_sticky_arrows(uint16_t keycode, keyrecord_t *record) {
         return false;
     }
 
-    if (arrows_on && keycode == KC_X_FN) {
+    if (arrows_on && (keycode == KC_X_FN || keycode == KM_X_FN)) {
         // If swapping between layers, clear all arrows
         if (record->event.pressed) {
             unregister_code(KC_LEFT);
@@ -283,7 +299,7 @@ bool handle_sticky_arrows(uint16_t keycode, keyrecord_t *record) {
         return true;
     }
 
-    const uint16_t arrow_code = IS_LAYER_ON(LAYER_FN) ? LAYER_FN_ARROWS[record->event.key.row][record->event.key.col] : LAYER_ARROWS[record->event.key.row][record->event.key.col];
+    const uint16_t arrow_code = (IS_LAYER_ON(LAYER_FN) || IS_LAYER_ON(LAYER_FN_MAC)) ? LAYER_FN_ARROWS[record->event.key.row][record->event.key.col] : LAYER_ARROWS[record->event.key.row][record->event.key.col];
 
     if (arrow_code != _______) {
         // always clear both codes when lifting the key; this helps
@@ -414,12 +430,15 @@ uint8_t cur_dance(tap_dance_state_t *state) {
         return 8; // Magic number. At some point this method will expand to work for more presses
 }
 
+// clang-format off
 const uint16_t x_modifiers[][2] = {
-    [X_FN]   = {MO(LAYER_FN), MO(LAYER_FN_NUMS)},
+    [X_FN] = {MO(LAYER_FN), MO(LAYER_FN_NUMS)},
+    [X_FN_MAC] = {MO(LAYER_FN_MAC), MO(LAYER_FN_NUMS)},
     [X_LCTL] = {KC_LCTL, LCTL_NUM},
     [X_LGUI] = {KC_LGUI, LCTL_NUM},
     [X_LALT] = {KC_LALT, LALT_NUM},
 };
+// clang-format on
 
 void set_modifier(const uint16_t keycode) {
     switch (keycode) {
@@ -465,12 +484,15 @@ void unset_modifier(const uint16_t keycode) {
     }
 }
 
+// clang-format off
 tap_dance_action_t tap_dance_actions[] = {
-    [X_FN]   = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
+    [X_FN] = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
+    [X_FN_MAC] = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
     [X_LCTL] = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
     [X_LGUI] = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
     [X_LALT] = ACTION_TAP_DANCE_FN_ADVANCED(x_on_each_tap, NULL, x_reset),
 };
+// clang-format on
 
 void x_on_each_tap(tap_dance_state_t *state, void *user_data) {
     const uint16_t tap_dance_code = TAP_DANCE_KEYCODE(state) ^ QK_TAP_DANCE;
