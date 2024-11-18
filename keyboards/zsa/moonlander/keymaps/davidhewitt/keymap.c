@@ -37,6 +37,8 @@ enum custom_keycodes {
     WIN_9,
     WIN_10,
     HOST,
+    KCTOMAC,
+    KCTOWIN,
 };
 
 typedef struct {
@@ -101,13 +103,15 @@ enum {
 #define FN_NUMS MO(LAYER_FN_NUMS)
 #define WINTRVL MO(LAYER_WINTRAVEL)
 #define JUMPKEY OSL(LAYER_LAYERTRAVEL)
-#define KCASMAC DF(LAYER_BASE_MAC)
-#define KCASWIN DF(LAYER_BASE)
+// #define KCASMAC DF(LAYER_BASE_MAC)
+// #define KCASWIN DF(LAYER_BASE)
+
+static bool is_macos = false;
 
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [LAYER_BASE] = LAYOUT_moonlander(
-    KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KCASMAC,               _______, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    HOST,
+    KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KCTOMAC,               _______, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    HOST,
     KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    _______,               KC_MEH,  KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    _______,
     WINTRVL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_ESC,                _______, KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_LALT,
     KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                                    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,
@@ -115,7 +119,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                         KC_BSPC, KC_X_FN, KC_XCTL,               KC_ENT,  KC_RSFT, KC_SPCE
   ),
   [LAYER_BASE_MAC] = LAYOUT_moonlander(
-    KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KCASWIN,               _______, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    HOST,
+    KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KCTOWIN,               _______, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    HOST,
     KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    _______,               KC_MEH,  KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    _______,
     WINTRVL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_ESC,                _______, KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_LALT,
     KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                                    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,
@@ -210,7 +214,7 @@ bool handle_sticky_modifiers(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case KCALTTB:
             if (record->event.pressed) {
-                sticky_mods |= MOD_BIT(detected_host_os() == OS_MACOS ? KC_LGUI : KC_LALT);
+                sticky_mods |= MOD_BIT(is_macos ? KC_LGUI : KC_LALT);
                 add_mods(sticky_mods);
                 register_code(KC_TAB);
             } else {
@@ -311,9 +315,9 @@ bool handle_sticky_arrows(uint16_t keycode, keyrecord_t *record) {
     return true;
 }
 
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+bool handle_host_switch(uint16_t keycode, keyrecord_t *record) {
     if (keycode == HOST) {
-        int os = detected_host_os() == OS_MACOS ? KC_M : KC_W;
+        int os = is_macos ? KC_M : KC_W;
         if (record->event.pressed) {
             register_code(os);
         } else {
@@ -321,10 +325,30 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         }
         return false;
     }
+
+    if (keycode == KCTOMAC) {
+        set_single_persistent_default_layer(LAYER_BASE_MAC);
+        is_macos = true;
+        return false;
+    }
+
+    if (keycode == KCTOWIN) {
+        set_single_persistent_default_layer(LAYER_BASE);
+        is_macos = false;
+        return false;
+    }
+
+    return true;
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (!handle_sticky_modifiers(keycode, record)) {
         return false;
     }
     if (!handle_sticky_arrows(keycode, record)) {
+        return false;
+    }
+    if (!handle_host_switch(keycode, record)) {
         return false;
     }
     return true;
@@ -470,12 +494,14 @@ bool process_detected_host_os_user(os_variant_t detected_os) {
     switch (detected_os) {
         case OS_MACOS:
             set_single_persistent_default_layer(LAYER_BASE_MAC);
+            is_macos = true;
             break;
         case OS_IOS:
         case OS_WINDOWS:
         case OS_LINUX:
         case OS_UNSURE:
             set_single_persistent_default_layer(LAYER_BASE);
+            is_macos = false;
             break;
     }
 
