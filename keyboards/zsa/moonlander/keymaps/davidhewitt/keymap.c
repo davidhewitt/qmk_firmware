@@ -71,7 +71,7 @@ void x_reset(tap_dance_state_t *state, void *user_data);
 
 enum {
     LAYER_BASE,
-    LAYER_BASE_MACOS,
+    LAYER_BASE_MAC,
     LAYER_FN,
     LAYER_NUMS,
     LAYER_FN_NUMS,
@@ -101,7 +101,7 @@ enum {
 #define FN_NUMS MO(LAYER_FN_NUMS)
 #define WINTRVL MO(LAYER_WINTRAVEL)
 #define JUMPKEY OSL(LAYER_LAYERTRAVEL)
-#define KCASMAC DF(LAYER_BASE_MACOS)
+#define KCASMAC DF(LAYER_BASE_MAC)
 #define KCASWIN DF(LAYER_BASE)
 
 // clang-format off
@@ -114,7 +114,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_LCTL, KC_LGUI, KC_XALT, _______, JUMPKEY,          NUMBERS,               KC_ARRS,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_RCTL,
                                         KC_BSPC, KC_X_FN, KC_XCTL,               KC_ENT,  KC_RSFT, KC_SPCE
   ),
-  [LAYER_BASE_MACOS] = LAYOUT_moonlander(
+  [LAYER_BASE_MAC] = LAYOUT_moonlander(
     KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KCASWIN,               _______, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    HOST,
     KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    _______,               KC_MEH,  KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    _______,
     WINTRVL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_ESC,                _______, KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_LALT,
@@ -210,7 +210,7 @@ bool handle_sticky_modifiers(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case KCALTTB:
             if (record->event.pressed) {
-                sticky_mods |= MOD_BIT(KC_LALT);
+                sticky_mods |= MOD_BIT(detected_host_os() == OS_MACOS ? KC_LGUI : KC_LALT);
                 add_mods(sticky_mods);
                 register_code(KC_TAB);
             } else {
@@ -466,12 +466,10 @@ void x_reset(tap_dance_state_t *state, void *user_data) {
     unset_modifier(x_modifiers[tap_dance_code][modifier]);
 }
 
-// TODO: couldn't get this to work
-
 bool process_detected_host_os_user(os_variant_t detected_os) {
     switch (detected_os) {
         case OS_MACOS:
-            set_single_persistent_default_layer(LAYER_BASE_MACOS);
+            set_single_persistent_default_layer(LAYER_BASE_MAC);
             break;
         case OS_IOS:
         case OS_WINDOWS:

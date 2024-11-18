@@ -20,7 +20,11 @@
         "utility": "c",
         "ranges": "c",
         "compare": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "map": "c",
+        "set": "c",
+        "unordered_map": "c",
+        "unordered_set": "c"
     },
     "[markdown]": {
         "editor.trimAutoWhitespace": false,
