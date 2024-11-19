@@ -321,7 +321,23 @@ bool handle_sticky_arrows(uint16_t keycode, keyrecord_t *record) {
                 if (IS_LAYER_ON(LAYER_NUMS)) {
                     add_oneshot_mods(MOD_BIT(KC_LALT));
                 }
+
+                // macos: alt-left and alt-right function like ctrl-left and
+                // ctrl-right, so we make override cmd-left and cmd-right to
+                // alt-left and alt-right
+                int gui_mods = 0;
+                if (is_macos && (gui_mods = (get_mods() & MOD_MASK_GUI)) && (arrow_code == KC_LEFT || arrow_code == KC_RIGHT)) {
+                    del_mods(MOD_MASK_GUI);
+                    add_oneshot_mods(MOD_BIT(KC_LALT));
+                }
+
+                // whatever modifier madness we've done, we now send the code
                 register_code(arrow_code);
+
+                // restore any mods we've messed with
+                if (gui_mods) {
+                    add_mods(gui_mods);
+                }
             }
             // and report that no more handling needed
             return false;
