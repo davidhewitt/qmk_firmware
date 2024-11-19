@@ -307,11 +307,28 @@ bool handle_sticky_arrows(uint16_t keycode, keyrecord_t *record) {
     const uint16_t arrow_code = (IS_LAYER_ON(LAYER_FN) || IS_LAYER_ON(LAYER_FN_MAC)) ? LAYER_FN_ARROWS[record->event.key.row][record->event.key.col] : LAYER_ARROWS[record->event.key.row][record->event.key.col];
 
     if (arrow_code != _______) {
+        uint16_t final_arrow_code = arrow_code;
+        // macos: cmd-left and cmd-right function are used to move to start
+        // and end of lines instead of home/end
+        if (is_macos) {
+            if (arrow_code == KC_HOME) {
+                if (record->event.pressed) {
+                    add_oneshot_mods(MOD_BIT(KC_LGUI));
+                }
+                final_arrow_code = KC_LEFT;
+            } else if (arrow_code == KC_END) {
+                if (record->event.pressed) {
+                    add_oneshot_mods(MOD_BIT(KC_LGUI));
+                }
+                final_arrow_code = KC_RGHT;
+            }
+        }
+
         // always clear both codes when lifting the key; this helps
         // avoid the case where KC_ARRS has been released but the arrow
         // hasn't, or when the original key is down before the arrows.
         if (!record->event.pressed) {
-            unregister_code(arrow_code);
+            unregister_code(final_arrow_code);
             unregister_code(keycode);
         }
 
@@ -327,17 +344,17 @@ bool handle_sticky_arrows(uint16_t keycode, keyrecord_t *record) {
                     add_oneshot_mods(MOD_BIT(KC_LALT));
                 }
 
+                int gui_mods = 0;
                 // macos: alt-left and alt-right function like ctrl-left and
                 // ctrl-right, so we make override cmd-left and cmd-right to
                 // alt-left and alt-right
-                int gui_mods = 0;
-                if (is_macos && (gui_mods = (get_mods() & MOD_MASK_GUI)) && (arrow_code == KC_LEFT || arrow_code == KC_RIGHT)) {
+                if (is_macos && (arrow_code == KC_LEFT || arrow_code == KC_RGHT) && (gui_mods = (get_mods() & MOD_MASK_GUI))) {
                     del_mods(MOD_MASK_GUI);
                     add_oneshot_mods(MOD_BIT(KC_LALT));
                 }
 
                 // whatever modifier madness we've done, we now send the code
-                register_code(arrow_code);
+                register_code(final_arrow_code);
 
                 // restore any mods we've messed with
                 if (gui_mods) {
