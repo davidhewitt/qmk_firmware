@@ -106,6 +106,9 @@ enum {
 #define WINTRVL MO(LAYER_WINTRAVEL)
 #define JUMPKEY OSL(LAYER_LAYERTRAVEL)
 
+// win specifc keycodes
+#define KW_TERM LCTL(KC_PIPE)
+
 // mac specific keycodes
 #define KM_HASH LALT(KC_3)
 #define KM_PIPE LSFT(KC_NONUS_HASH)
@@ -113,6 +116,7 @@ enum {
 #define KM_X_FN TD(X_FN_MAC)
 #define KM_AT S(KC_2)
 #define KM_DQUO S(KC_QUOT)
+#define KM_TERM LCTL(KC_GRV)
 
 static bool is_macos = false;
 
@@ -121,23 +125,23 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [LAYER_BASE] = LAYOUT_moonlander(
     KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KCTOMAC,               _______, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    HOST,
     KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    _______,               KC_MEH,  KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    _______,
-    WINTRVL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_ESC,                _______, KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_LALT,
+    KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_ESC,                _______, KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_LALT,
     KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                                    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,
-    KC_LCTL, KC_LGUI, KC_XALT, _______, JUMPKEY,          NUMBERS,               KC_ARRS,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_RCTL,
+    KC_LCTL, KC_LGUI, KC_XALT, _______, JUMPKEY,          NUMBERS,               KC_ARRS,          _______, _______, _______, _______, KC_RCTL,
                                         KC_BSPC, KC_X_FN, KC_XCTL,               KC_ENT,  KC_RSFT, KC_SPCE
   ),
   [LAYER_BASE_MAC] = LAYOUT_moonlander(
     KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KCTOWIN,               _______, KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    HOST,
     KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    _______,               KC_MEH,  KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    _______,
-    WINTRVL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_ESC,                _______, KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_LALT,
+    KC_LCTL, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_ESC,                _______, KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_LALT,
     KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                                    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,
-    KC_LCTL, KC_LGUI, KC_XALT, _______, JUMPKEY,          NUMBERS,               KC_ARRS,          KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, KC_RCTL,
+    KC_LCTL, KC_LGUI, KC_XALT, _______, JUMPKEY,          NUMBERS,               KC_ARRS,          _______, _______, _______, _______, KC_RCTL,
                                         KC_BSPC, KM_X_FN, KC_XGUI,               KC_ENT,  KC_RSFT, KC_SPCE
   ),
   [LAYER_FN] = LAYOUT_moonlander(
     KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   TO(0),                 _______, KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
     _______, KC_EXLM, UK_AT,   KC_LCBR, KC_RCBR, KC_QUOT, _______,               _______, KC_QUOT, KC_EQL,  KC_PLUS, KC_DLR,  KCPOUND, KC_F12,
-    _______, KC_HASH, KC_PERC, KC_LPRN, KC_RPRN, KC_GRV,  _______,               _______, KC_AT,   KC_MINS, KC_UNDS, KC_TILD, KC_COLN, _______,
+    _______, KC_HASH, KC_PERC, KC_LPRN, KC_RPRN, KC_GRV,  KW_TERM,               _______, KC_AT,   KC_MINS, KC_UNDS, KC_TILD, KC_COLN, _______,
     _______, KC_PIPE, KC_CIRC, KC_LBRC, KC_RBRC, KC_BSLH,                        KC_AMPR, KC_ASTR, KC_LABK, KC_RABK, KC_QUES, _______,
     _______, KC_APP,  _______, _______, _______,          _______,               _______,          KC_HOME, KC_PGDN, KC_PGUP, KC_END,  _______,
                                         KC_DEL,  _______, _______,               _______, _______, _______
@@ -145,7 +149,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [LAYER_FN_MAC] = LAYOUT_moonlander(
     KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   TO(0),                 _______, KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
     _______, KC_EXLM, KM_AT,   KC_LCBR, KC_RCBR, KC_QUOT, _______,               _______, KC_QUOT, KC_EQL,  KC_PLUS, KC_DLR,  KCPOUND, KC_F12,
-    _______, KM_HASH, KC_PERC, KC_LPRN, KC_RPRN, KC_GRV,  _______,               _______, KM_DQUO, KC_MINS, KC_UNDS, KM_TILD,  KC_COLN, _______,
+    _______, KM_HASH, KC_PERC, KC_LPRN, KC_RPRN, KC_GRV,  KM_TERM,               _______, KM_DQUO, KC_MINS, KC_UNDS, KM_TILD,  KC_COLN, _______,
     _______, KM_PIPE, KC_CIRC, KC_LBRC, KC_RBRC, KC_BSLH,                        KC_AMPR, KC_ASTR, KC_LABK, KC_RABK, KC_QUES, _______,
     _______, KC_APP,  _______, _______, _______,          _______,               _______,          KC_HOME, KC_PGDN, KC_PGUP, KC_END,  _______,
                                         KC_DEL,  _______, _______,               _______, _______, _______
@@ -166,6 +170,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     _______, _______, _______, _______, _______,          _______,               _______,          _______, _______, _______, _______, _______,
                                         _______, _______, _______,               _______, _______, _______
   ),
+  // TODO: remove this layer? activation key got replaced by KC_LCTL
   [LAYER_WINTRAVEL] = LAYOUT_moonlander(
     _______, WIN_1,   WIN_2,   WIN_3,   WIN_4,   WIN_5,   _______,               _______, WIN_6,   WIN_7,   WIN_8,   WIN_9,   WIN_10,  _______,
     _______, _______, WIN_1,   WIN_2,   WIN_3,   WIN_10,  _______,               _______, _______, _______, _______, _______, _______, _______,
