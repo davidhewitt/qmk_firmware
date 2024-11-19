@@ -114,8 +114,8 @@ enum {
 #define KM_PIPE LSFT(KC_NONUS_HASH)
 #define KM_TILD LSFT(KC_GRV)
 #define KM_X_FN TD(X_FN_MAC)
-#define KM_AT S(KC_2)
-#define KM_DQUO S(KC_QUOT)
+#define KM_AT LSFT(KC_2)
+#define KM_DQUO LSFT(KC_QUOT)
 #define KM_TERM LCTL(KC_GRV)
 
 static bool is_macos = false;
@@ -312,12 +312,12 @@ bool handle_sticky_arrows(uint16_t keycode, keyrecord_t *record) {
         // and end of lines instead of home/end
         if (is_macos) {
             if (arrow_code == KC_HOME) {
-                if (record->event.pressed) {
+                if (arrows_on && record->event.pressed) {
                     add_oneshot_mods(MOD_BIT(KC_LGUI));
                 }
                 final_arrow_code = KC_LEFT;
             } else if (arrow_code == KC_END) {
-                if (record->event.pressed) {
+                if (arrows_on && record->event.pressed) {
                     add_oneshot_mods(MOD_BIT(KC_LGUI));
                 }
                 final_arrow_code = KC_RGHT;
