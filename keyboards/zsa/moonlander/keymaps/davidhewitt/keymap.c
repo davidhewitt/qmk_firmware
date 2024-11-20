@@ -111,6 +111,7 @@ enum {
 
 // mac specific keycodes
 #define KM_HASH LALT(KC_3)
+#define KM_BSLH KC_NONUS_HASH
 #define KM_PIPE LSFT(KC_NONUS_HASH)
 #define KM_TILD LSFT(KC_GRV)
 #define KM_X_FN TD(X_FN_MAC)
@@ -149,8 +150,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [LAYER_FN_MAC] = LAYOUT_moonlander(
     KC_GRV,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   TO(0),                 _______, KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
     _______, KC_EXLM, KM_AT,   KC_LCBR, KC_RCBR, KC_QUOT, _______,               _______, KC_QUOT, KC_EQL,  KC_PLUS, KC_DLR,  KCPOUND, KC_F12,
-    _______, KM_HASH, KC_PERC, KC_LPRN, KC_RPRN, KC_GRV,  KM_TERM,               _______, KM_DQUO, KC_MINS, KC_UNDS, KM_TILD,  KC_COLN, _______,
-    _______, KM_PIPE, KC_CIRC, KC_LBRC, KC_RBRC, KC_BSLH,                        KC_AMPR, KC_ASTR, KC_LABK, KC_RABK, KC_QUES, _______,
+    _______, KM_HASH, KC_PERC, KC_LPRN, KC_RPRN, KC_GRV,  KM_TERM,               _______, KM_DQUO, KC_MINS, KC_UNDS, KM_TILD, KC_COLN, _______,
+    _______, KM_PIPE, KC_CIRC, KC_LBRC, KC_RBRC, KM_BSLH,                        KC_AMPR, KC_ASTR, KC_LABK, KC_RABK, KC_QUES, _______,
     _______, KC_APP,  _______, _______, _______,          _______,               _______,          KC_HOME, KC_PGDN, KC_PGUP, KC_END,  _______,
                                         KC_DEL,  _______, _______,               _______, _______, _______
   ),
