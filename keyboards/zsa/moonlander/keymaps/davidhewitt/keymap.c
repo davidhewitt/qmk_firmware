@@ -107,7 +107,7 @@ enum {
 #define JUMPKEY OSL(LAYER_LAYERTRAVEL)
 
 // win specifc keycodes
-#define KW_TERM LCTL(KC_PIPE)
+#define KW_TERM LCTL(KC_NONUS_BACKSLASH)
 
 // mac specific keycodes
 #define KM_HASH LALT(KC_3)
