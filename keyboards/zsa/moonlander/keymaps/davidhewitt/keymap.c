@@ -22,6 +22,7 @@
 
 enum custom_keycodes {
     LCTL_NUM = SAFE_RANGE,
+    LGUI_NUM,
     LALT_NUM,
     RGB_SLD,
     KC_ARRS,
@@ -414,7 +415,7 @@ const uint16_t x_modifiers[][2] = {
     [X_FN] = {MO(LAYER_FN), MO(LAYER_FN_NUMS)},
     [X_FN_MAC] = {MO(LAYER_FN_MAC), MO(LAYER_FN_NUMS)},
     [X_LCTL] = {KC_LCTL, LCTL_NUM},
-    [X_LGUI] = {KC_LGUI, LCTL_NUM},
+    [X_LGUI] = {KC_LGUI, LGUI_NUM},
     [X_LALT] = {KC_LALT, LALT_NUM},
 };
 // clang-format on
@@ -429,6 +430,11 @@ void set_modifier(const uint16_t keycode) {
         case LALT_NUM:
             layer_on(LAYER_NUMS);
             register_code(KC_LALT);
+            break;
+
+        case LGUI_NUM:
+            layer_on(LAYER_NUMS);
+            register_code(KC_LGUI);
             break;
 
         default:
@@ -451,6 +457,11 @@ void unset_modifier(const uint16_t keycode) {
         case LALT_NUM:
             layer_off(LAYER_NUMS);
             unregister_code(KC_LALT);
+            break;
+
+        case LGUI_NUM:
+            layer_off(LAYER_NUMS);
+            unregister_code(KC_LGUI);
             break;
 
         default:
