@@ -397,6 +397,34 @@ bool handle_host_switch(uint16_t keycode, keyrecord_t *record) {
     return true;
 }
 
+static bool left_pinkie_control_active = false;
+
+bool handle_left_pinkie_control_shortcuts(uint16_t keycode, keyrecord_t *record) {
+    if (is_macos) {
+        return true;
+    }
+
+    // special case for left control, send ctrl - alt - c when not on macos
+    // to allow interrupt in terminal
+    if (!is_macos && record->event.key.row == 2 && record->event.key.col == 0) {
+        left_pinkie_control_active = record->event.pressed;
+        return true;
+    }
+
+    if (left_pinkie_control_active && keycode == KC_C) {
+        if (record->event.pressed) {
+            register_code(KC_LALT);
+            register_code(KC_C);
+        } else {
+            unregister_code(KC_LALT);
+            unregister_code(KC_C);
+        }
+        return false;
+    }
+
+    return true;
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (!handle_sticky_modifiers(keycode, record)) {
         return false;
@@ -405,6 +433,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         return false;
     }
     if (!handle_host_switch(keycode, record)) {
+        return false;
+    }
+    if (!handle_left_pinkie_control_shortcuts(keycode, record)) {
         return false;
     }
     return true;
