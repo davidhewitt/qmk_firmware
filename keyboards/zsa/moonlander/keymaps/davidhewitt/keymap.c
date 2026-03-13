@@ -407,7 +407,14 @@ bool handle_left_pinkie_control_shortcuts(uint16_t keycode, keyrecord_t *record)
     // special case for left control, send ctrl - alt - c when not on macos
     // to allow interrupt in terminal
     if (!is_macos && record->event.key.row == 2 && record->event.key.col == 0) {
-        left_pinkie_control_active = record->event.pressed;
+        if (record->event.pressed) {
+            left_pinkie_control_active = true;
+        } else {
+            // always unregister lalt too, in case the left control key is released
+            // before the C key, which would leave alt stuck
+            left_pinkie_control_active = false;
+            unregister_code(KC_LALT);
+        }
         return true;
     }
 
